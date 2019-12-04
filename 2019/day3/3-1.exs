@@ -1,14 +1,3 @@
-# defmodule Segment do
-#   defstruct direction: nil, start: {0, 0}, end: {0, 0}
-
-#   def intersects?(a, b) do
-#     cond do
-#       a.directio ->
-
-#     end
-#   end
-# end
-
 defmodule Day3Part1 do
 
   def expand_segment({direction, distance}, {x, y}) do
