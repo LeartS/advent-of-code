@@ -46,14 +46,22 @@ defmodule Computer do
 end
 
 defmodule Day5 do
-  s = InstructionSet.new()
-  |> InstructionSet.register(Instruction.new(:"01", 2, 1, &*/2))
-  |> InstructionSet.register(Instruction.new(:"02", 2, 1, &+/2))
-  |> InstructionSet.register(Instruction.new(:"03", 0, 1,
-    fn -> IO.gets("Inserisci") |> String.trim() |> String.to_integer() end
-  ))
-  |> InstructionSet.register(Instruction.new(:"04", 1, 0, &IO.puts/1))
-  Computer.run(s, {"03", "10", "04", "10"}, 0)
-  # Computer.run(s)
+
+  def main() do
+    s = InstructionSet.new()
+    |> InstructionSet.register(Instruction.new(:"01", 2, 1, &*/2))
+    |> InstructionSet.register(Instruction.new(:"02", 2, 1, &+/2))
+    |> InstructionSet.register(Instruction.new(:"03", 0, 1,
+      fn -> IO.gets("Inserisci") |> String.trim() |> String.to_integer() end
+    ))
+    |> InstructionSet.register(Instruction.new(:"04", 1, 0, &IO.puts/1))
+
+    memory = IO.gets("Memory:\n")
+    |> String.trim()
+    |> String.split(",")
+    |> Enum.map(&String.to_integer/1)
+
+    Computer.run(s, memory, 0)
+  end
 
 end
