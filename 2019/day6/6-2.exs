@@ -4,8 +4,7 @@ defmodule Tree do
   def new(), do: %Tree{}
 
   def add_node(tree, parent, node) do
-    parent_children = Map.get(tree.nodes, parent, [])
-    new_nodes = Map.put(tree.nodes, parent, [node | parent_children])
+    new_nodes = Map.put(tree.nodes, node, parent)
     %Tree{tree | nodes: new_nodes}
   end
 
@@ -20,18 +19,20 @@ defmodule Tree do
     end
   end
 
-  def bfs(tree, node) do
-    Stream.unfold([node], fn
-      [] -> nil
-      [head] -> {head, Map.get(tree.nodes, head, [])}
-      [head | tail] -> {head, tail ++ Map.get(tree.nodes, head, [])}
-    end)
+  def path_to_root(tree, node) do
+    case Map.fetch(tree.nodes, node) do
+      {:ok, parent} -> [node | path_to_root(tree, parent)]
+      :error -> [node]
+    end
   end
 
-  def orbit_count(tree, node, height) do
-    c = Map.get(tree.nodes, node, [])
-    |> Enum.reduce(0, fn node, total -> total + orbit_count(tree, node, height + 1) end)
-    c + height
+  def shortest_path(tree, from, to) do
+    path1 = Tree.path_to_root(tree, from) |> Enum.reverse()
+    path2 = Tree.path_to_root(tree, to) |> Enum.reverse()
+    shared_path = Enum.zip(path1, path2)
+    |> Enum.take_while(fn {a, b} -> a == b end)
+    |> Enum.map(fn {a, _b} -> a end)
+    length(path1) + length(path2) - 2 * length(shared_path) - 2
   end
 end
 
@@ -42,7 +43,7 @@ defmodule Day6 do
       [parent, node] = line |> String.trim() |> String.split(")")
       {parent, node}
     end
-    Tree.orbit_count(tree, "COM", 0) |> IO.puts()
+    Tree.shortest_path(tree, "YOU", "SAN") |> IO.inspect()
   end
 end
 
