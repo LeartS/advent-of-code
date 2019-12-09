@@ -13,8 +13,13 @@ defmodule Memory do
   def read(memory, addrs) when is_list(addrs) do
     Enum.map(addrs, & Memory.read(memory, &1))
   end
+  def read(_memory, _addr, 0), do: []
+  def read(memory, addr, count) do
+    [Memory.read(memory, addr) | Memory.read(memory, addr+1, count-1)]
+  end
 
   def save(memory, addr, value), do: put_elem(memory, addr, value)
+  def save(memory, []), do: memory
   def save(memory, [{addr, value} | tail]) do
     Memory.save(memory, addr, value)
     |> Memory.save(tail)
@@ -22,61 +27,10 @@ defmodule Memory do
 end
 
 
-# defmodule Instruction do
-#   @callback exec(memory :: Memory.t(), addr :: integer) ::
-#     {:halt, Memory.t()}
-#     {next_addr :: integer, Memory.t()}
-# end
-
-# defmodule Instruction.Multiply do
-#   @behaviour Instruction
-
-#   # exec
-# end
-
-
-# defmodule Instruction do
-#   # @type t :: %Instruction{opcode: atom(), }
-
-#   def new(opcode, input_arity, output_arity, function) do
-#     %Instruction{opcode: opcode, input_arity: input_arity, output_arity: output_arity, function: function}
-#   end
-
-
-#   def get_inputs_and_outputs(memory) do
-
-#   end
-
-#   def save_output(memory, outputs, output_addrs) do
-#     Memory.save(memory, Enum.zip(outputs, output_addrs))
-#   end
-
-#   def exec(instruction, memory, address) do
-#     param_modes = elem(memory, address)
-#     |> to_string()
-#     |> String.slice(0..-3)  # remove opcode
-#     |> String.pad_leading(instruction.input_arity, "0")
-#     |> String.reverse()
-#     |> String.to_charlist()
-
-#     input_values = address+1..address+instruction.input_arity
-#     |> Enum.zip(param_modes)
-#     |> Enum.map(fn {addr, mode} -> get_param(memory, addr, mode) end)
-#     |> IO.inspect()
-
-#     output_addresses = address+instruction.input_arity+1..address.
-
-#     outputs = apply(instruction.function, input_values) |> List.wrap()
-#     Instruction.save_outputs(memory, outputs, )
-#     memory = put_elem(memory, address + instruction.input_arity + instruction.output_arity + 1, output)
-#     IO.puts("Opcode: #{instruction.opcode} input: #{inspect(input_values)} output: #{output}")
-#     {address + instruction.input_arity + instruction.output_arity + 1, memory}
-#   end
-# end
-
 defmodule InstructionDesc do
   defstruct opcode: nil, input_params: nil, output_params: nil
 end
+
 
 defmodule Intcode do
   @instructions %{
@@ -101,6 +55,7 @@ defmodule Intcode do
     IO.gets("Input: ") |> String.trim() |> String.to_integer()
   end
   def exec_instruction(:"04", [a]), do: IO.puts(a)
+  def exec_instruction(:"99", []), do: nil
 
   def parse_instruction_intcode(intcode) do
     {param_modes, opcode} = intcode
@@ -119,30 +74,14 @@ defmodule Intcode do
     }
   end
 
-  def save_outputs(instruction, memory, address, outputs) do
-    Enum.with_index(outputs, address + instruction.input_params + 1)
-    |> IO.inspect()
-    |> Enum.reduce(memory, fn out, addr -> Memory.save(memory, addr, out) end)
-  end
-
   def exec_addr(memory, address) do
-    %{instruction: instr, input_modes: im, output_modes: om} = c =
-      Memory.read(memory, address)
-      # |> IO.inspect()
+    %{instruction: instr, input_modes: im} = Memory.read(memory, address)
       |> Intcode.parse_instruction_intcode()
-    # IO.inspect(c)
     inputs = Enum.zip(address+1..address+instr.input_params, im)
-    # |> IO.inspect()
     input_values = Intcode.get_params(memory, inputs)
-    # IO.inspect(input_values)
-    IO.puts("merda")
-    boh = Enum.zip(address+instr.input_params+1..address+instr.input_params+instr.output_params, om)
-    |> IO.inspect()
-    output_addresses = Intcode.get_params(memory, boh)
-    |> IO.inspect()
-    outputs = Intcode.exec_instruction(instr.opcode, input_values) |> List.wrap()
-    memory = Intcode.save_outputs(instr, memory, address, outputs)
-    # IO.inspect(memory)
+    output_addresses = Memory.read(memory, address+instr.input_params+1, instr.output_params)
+    output_values = Intcode.exec_instruction(instr.opcode, input_values) |> List.wrap()
+    memory = Memory.save(memory, Enum.zip(output_addresses, output_values))
     if instr.opcode == :"99" do
       {:halt, memory}
     else
@@ -168,7 +107,6 @@ defmodule Day5 do
   def main() do
     IO.gets("Memory:\n")
     |> Memory.from_string()
-    |> IO.inspect()
     |> IntcodeComputer.run(0)
   end
 end
