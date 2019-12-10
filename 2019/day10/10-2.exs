@@ -15,7 +15,7 @@ defmodule AsteroidVisibilityMap do
 
   def count_visible(self), do: map_size(self.vm)
 
-  def vaporize(t) do
+  def vaporization_order(t) do
     t.vm
     |> Enum.flat_map(fn {θ, asteroids} ->
       for {{r, a}, i} <- Enum.with_index(asteroids), do: {{2*i*:math.pi + θ, r}, a}
@@ -40,7 +40,7 @@ defmodule Day10Part1 do
     for {line, i} <- Stream.with_index(IO.stream(:stdio, :line)) do
       chars = line
       |> String.trim()
-      |> String.graphemes
+      |> String.graphemes()
       for {char, j} <- Stream.with_index(chars), char == "#" do
         {i, j}
       end
@@ -61,7 +61,7 @@ defmodule Day10Part1 do
     {_, coords} = _final_vaporized = asteroids
     |> Enum.map(&(build_asteroid_visibility_map(asteroids, &1)))
     |> Enum.max_by(fn avm -> AsteroidVisibilityMap.count_visible(avm) end)
-    |> AsteroidVisibilityMap.vaporize()
+    |> AsteroidVisibilityMap.vaporization_order()
     |> Enum.at(target_index-1)
     IO.puts("The #{target_index}th asteroid to be vaporized has coordinates #{inspect(coords)}")
   end
