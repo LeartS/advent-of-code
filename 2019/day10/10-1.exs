@@ -1,40 +1,30 @@
-defmodule Day10Part1 do
+defmodule AsteroidVisibilityMap do
+  defstruct vm: %{}, asteroid: nil
 
-  defp simplify({n, d}) do
-    gcd = Integer.gcd(n, d)
-    {div(n, gcd), div(d, gcd)}
-  end
+  def new(asteroid), do: %AsteroidVisibilityMap{asteroid: asteroid}
 
-  defp line_slope({ax, _ay}, {bx, _by}) when ax == bx, do: :vertical
-  defp line_slope({ax, ay}, {bx, by}), do: simplify({by-ay, bx-ax})
-
-  @doc """
-  Returns true if the point is the first or last in a set of collinear points
-  """
-  def is_extreme_point?(point, collinear) do
-    sorted_points = [point | collinear] |> Enum.sort()
-    cond do
-      Enum.at(sorted_points, 0) == point -> true
-      Enum.at(sorted_points, -1) == point -> true
-      true -> false
+  defimpl Collectable do
+    def into(original) do
+      collector = fn
+        vm, {:cont, {φ, asteroid}} -> %{vm | vm: Map.update(vm.vm, φ, [asteroid], &([asteroid | &1]))}
+        vm, :done -> vm
+      end
+      {original, collector}
     end
   end
 
-  defp count_visible_in_line(_asteroid, []), do: 0
-  defp count_visible_in_line(_asteroid, [_]), do: 1
-  defp count_visible_in_line(asteroid, collinear) do
-    if is_extreme_point?(asteroid, collinear), do: 1, else: 2
+  def count_visible(self), do: map_size(self.vm)
+end
+
+defmodule Day10Part1 do
+
+  defp get_polar_coordinates({refx, refy}, {px, py}) do
+    {δx, δy} = {px-refx, py-refy}
+    {:math.atan2(δy, δx), :math.sqrt(δx*δx + δy*δy)}
   end
 
-  defp count_visible(asteroid, asteroid_visibility_map) do
-    asteroid_visibility_map
-    |> Enum.reduce(0, fn {_slope, collinear_asteroids}, total ->
-      total + count_visible_in_line(asteroid, collinear_asteroids)
-    end)
-  end
-
-  def main() do
-    asteroids = for {line, i} <- Stream.with_index(IO.stream(:stdio, :line)) do
+  def read_asteroids_coordinates() do
+    for {line, i} <- Stream.with_index(IO.stream(:stdio, :line)) do
       chars = line
       |> String.trim()
       |> String.graphemes
@@ -44,17 +34,21 @@ defmodule Day10Part1 do
     end
     |> List.flatten()
     |> Enum.map(fn {r, c} -> {c, r} end)
+  end
 
-    visibility_map = Map.new(asteroids, & {&1, %{}})
-    asteroid_combinations = for a1 <- asteroids, a2 <- asteroids, do: {a1, a2}, into: []
-    {best_asteroid, best_asteroid_vm} = asteroid_combinations
-    |> Enum.reduce(visibility_map, fn
-      {a, a}, vm -> vm
-      {a, b}, vm -> update_in(vm, [a], fn m -> Map.update(m, line_slope(a, b), [b], &([b | &1])) end)
-    end)
-    |> Enum.max_by(fn {k, v} -> count_visible(k, v) end)
+  defp build_asteroid_visibility_map(asteroids, reference) do
+    for asteroid <- asteroids, asteroid != reference, into: AsteroidVisibilityMap.new(reference) do
+      {φ, _r} = get_polar_coordinates(reference, asteroid)
+      {φ, asteroid}
+    end
+  end
 
-    IO.puts("Best asteroid: #{inspect(best_asteroid)} visible: #{count_visible(best_asteroid, best_asteroid_vm)}")
+  def main() do
+    asteroids = read_asteroids_coordinates()
+    best = asteroids
+    |> Enum.map(&(build_asteroid_visibility_map(asteroids, &1)))
+    |> Enum.max_by(fn avm -> AsteroidVisibilityMap.count_visible(avm) end)
+    IO.puts("Best asteroid: #{inspect(best.asteroid)} visible: #{AsteroidVisibilityMap.count_visible(best)}")
   end
 end
 
