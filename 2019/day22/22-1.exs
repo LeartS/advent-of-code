@@ -1,4 +1,8 @@
 defmodule Deck do
+  @moduledoc """
+  Real implementation of the deck shuffling algorithms,
+  operates on the whole deck (list of cards)
+  """
 
   def reverse(cards) do
     Enum.reverse(cards)
@@ -29,15 +33,64 @@ defmodule Deck do
 end
 
 
+defmodule DeckOptimized do
+  @moduledoc """
+  Optimized implementation of the deck shuffling that just simulates
+  where a card in a specific position ends ups after the step.
+  """
+
+  def reverse(size, position) do
+    (position * -1) + (size - 1)
+  end
+
+  def cut(size, position, n) do
+    Integer.mod(position - n, size)
+  end
+
+  def deal(size, position, n) do
+    Integer.mod(position * n, size)
+  end
+
+  def exec(size, position, "deal into new stack"), do: reverse(size, position)
+  def exec(size, position, "cut " <> n) do
+    n = String.to_integer(n)
+    cut(size, position, n)
+  end
+  def exec(size, position, "deal with increment " <> n) do
+    n = String.to_integer(n)
+    deal(size, position, n)
+  end
+end
+
+
 defmodule Day22Part1 do
+  @starting_position 2019
   @deck_size 10007
+
+  def solve_trivial(commands) do
+    initial_deck = 0..@deck_size-1 |> Enum.to_list()
+
+    commands
+    |> Enum.reduce(initial_deck, fn line, deck -> Deck.exec(deck, line) end)
+    |> Enum.find_index(&Kernel.==(&1, @starting_position))
+  end
+
+  def solve_optimized(commands) do
+    commands
+    |> Enum.reduce(
+      @starting_position,
+      fn command, position ->
+        DeckOptimized.exec(@deck_size, position, command)
+      end
+    )
+  end
 
   def main() do
     initial_deck = 0..@deck_size-1 |> Enum.to_list()
-    IO.stream(:stdio, :line)
+    commands = IO.stream(:stdio, :line)
     |> Stream.map(&String.trim/1)
-    |> Enum.reduce(initial_deck, fn line, deck -> Deck.exec(deck, line) end)
-    |> Enum.find_index(&Kernel.==(&1, 2019))
+    solve_trivial(commands)
+    # solve_optimized(commands)
     |> IO.puts()
   end
 
