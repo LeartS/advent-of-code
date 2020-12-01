@@ -6,8 +6,8 @@ fn find_couple_with_sum(numbers: &Vec<i32>, sum: i32) -> Option<(i32, i32)> {
     numbers.iter().find_map(|&n1| {
         let n2 = sum - n1;
         match number_set.count_of(&n2) {
-            c if n1 == n2 && c >= 2 => Some((n1, n2)),
-            c if c >= 1 => Some((n1, n2)),
+            c if n1 != n2 && c >= 1 => Some((n1, n2)),
+            c if c >= 2 => Some((n1, n2)),
             _ => None
         }
     })
@@ -24,9 +24,9 @@ fn find_trouple_with_sum(numbers: &Vec<i32>, sum: i32) -> Option<(i32, i32, i32)
         for &n2 in &sorted_numbers[i + 1..numbers.len()] {
             let n3 = sum - (n1 + n2);
             match (n1, n2, n3, number_set.count_of(&n3)) {
+                (n1, n2, n3, c) if (n1 != n3) && (n2 != n3) && c >= 1 => return Some((n1, n2, n3)),
+                (n1, n2, n3, c) if (n1 == n3) ^ (n2 == n3) && c >= 2 => return Some((n1, n2, n3)),
                 (n1, n2, n3, c) if (n1 == n2) && (n2 == n3) && c >= 3 => return Some((n1, n2, n3)),
-                (n1, n2, n3, c) if (n1 == n3) || (n2 == n3) && c >= 2 => return Some((n1, n2, n3)),
-                (n1, n2, n3, c) if c >= 1 => return Some((n1, n2, n3)),
                 _ => continue
             }
         }
