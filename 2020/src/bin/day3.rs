@@ -4,31 +4,29 @@ fn flat_index(width: usize, row: usize, col: usize) -> usize {
     row * width + col
 }
 
-fn count_trees(flat_matrix: &Vec<bool>, width: usize, row_step: usize, col_step: usize) -> usize {
+fn count_trees(flat_matrix: &Vec<char>, width: usize, row_step: usize, col_step: usize) -> usize {
     let mut r = 0;
     let mut c = 0;
     let mut trees_count = 0;
     while flat_index(width, r, c) < flat_matrix.len() {
-        if !flat_matrix[flat_index(width, r, c)] { trees_count = trees_count + 1; }
+        if flat_matrix[flat_index(width, r, c)] == '#' { trees_count = trees_count + 1; }
         r = r + row_step;
         c = (c + col_step) % width;
     }
     trees_count
 }
 
-fn read_treemap() -> ((usize, usize), Vec<bool>) {
+fn read_treemap() -> ((usize, usize), Vec<char>) {
     let stdin = io::stdin();
     let mut lines = stdin.lock().lines().peekable();
     let width = lines.peek()
         .unwrap()
         .as_ref()
         .unwrap()
-        .len()
-        .clone();
-    let matrix: Vec<bool> = lines
+        .len();
+    let matrix: Vec<char> = lines
         .map(|l| l.expect("Could not read line"))
         .flat_map(|l| l.chars().collect::<Vec<char>>())
-        .map(|c| if c == '.' { true } else { false })
         .collect::<Vec<_>>();
     ((width, matrix.len() / width), matrix)
 }
@@ -46,7 +44,6 @@ fn part2() {
     for (row_step, col_step) in slopes {
         res = res * count_trees(&treemap, width, row_step, col_step)
     }
-    // let valid_count = count_valid_passwords(check_valid_password_positions);
     println!("{} trees", res);
 }
 
