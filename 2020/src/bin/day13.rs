@@ -1,7 +1,6 @@
 use std::io::{self, Read};
 use itertools::Itertools;
 
-// Returns start + a*n =
 fn find_timestamp(start: u64, cycle: u64, bus: u64) -> (u64, u64) {
     // println!("{} + {}n = 0 (mod {})", start, cycle, bus);
     let mut timestamp = start;
@@ -11,7 +10,7 @@ fn find_timestamp(start: u64, cycle: u64, bus: u64) -> (u64, u64) {
     })
         .find(|n| n % bus == 0)
         // all bus ids are prime => all cycle lengths are coprime
-        // => the new cycle length is simply old_cycle_lengh * bus_cycle_lenght
+        // => the new cycle length is simply old_cycle_length * bus_cycle_length
         .map(|n| (n, cycle * bus))
         .expect("something strange happened")
 }
