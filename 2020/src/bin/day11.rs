@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use std::cmp::min;
-use std::collections::HashMap;
 use std::io::{self, BufRead};
 
 type Grid = Vec<Vec<char>>;
