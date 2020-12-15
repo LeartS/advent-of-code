@@ -26,12 +26,12 @@ fn iter_game(initial_numbers: &[usize]) -> impl Iterator<Item = usize> {
 }
 
 fn part1(initial_numbers: &[usize]) {
-    let res = iter_game(initial_numbers).skip(2019).next().unwrap();
+    let res = iter_game(initial_numbers).nth(2019).unwrap();
     println!("{} is the 2020th spoken number", res);
 }
 
 fn part2(initial_numbers: &[usize]) {
-    let res = iter_game(initial_numbers).skip(29_999_999).next().unwrap();
+    let res = iter_game(initial_numbers).nth(29_999_999).unwrap();
     println!("{} is the 30,000,000th spoken number", res);
 }
 
