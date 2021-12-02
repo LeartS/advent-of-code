@@ -1,7 +1,7 @@
 import System.Environment (getArgs)
 
 data Command = Up Int | Down Int | Forward Int deriving (Eq, Show)
-type Position = (Int, Int)
+type SubmarineState = (Int, Int, Int) -- (Horizontal, Depth, Aim)
 
 parseCommand :: String -> Command
 parseCommand commandStr =
@@ -11,18 +11,24 @@ parseCommand commandStr =
     ["down", i] -> Down (read i)
     _ -> error "invalid command"
 
-combine :: Position -> Command -> Position
-combine (h, depth) (Up n) = (h, depth - n)
-combine (h, depth) (Down n) = (h, depth + n)
-combine (h, depth) (Forward n) = (h + n, depth)
+absoluteNavigation :: SubmarineState -> Command -> SubmarineState
+absoluteNavigation (h, depth, aim) (Up n) = (h, depth - n, aim)
+absoluteNavigation (h, depth, aim) (Down n) = (h, depth + n, aim)
+absoluteNavigation (h, depth, aim) (Forward n) = (h + n, depth, aim)
 
-partOne = do
+aimNavigation :: SubmarineState -> Command -> SubmarineState
+aimNavigation (h, depth, aim) (Up n) = (h, depth, aim - n)
+aimNavigation (h, depth, aim) (Down n) = (h, depth, aim + n)
+aimNavigation (h, depth, aim) (Forward n) = (h + n, depth + n * aim, aim)
+
+followCourse navigationFunction = do
   contents <- getContents
   let commands = (map parseCommand) . lines $ contents
-  let (h, depth) = foldl combine (0, 0) commands
+  let (h, depth, _) = foldl navigationFunction (0, 0, 0) commands
   print (h * depth)
 
-partTwo = error "not implemented yet"
+partOne = followCourse absoluteNavigation
+partTwo = followCourse aimNavigation
 
 main = do
   args <- getArgs
