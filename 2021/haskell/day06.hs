@@ -1,21 +1,27 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+import Data.Function (fix)
+import Data.List.Split (splitOn)
 import System.Environment (getArgs)
 import Text.Printf
-import Data.List.Split (splitOn)
 
-type LanternFish = Int
+-- The basic recursive definition
+familySize' :: (Int -> Int) -> Int -> Int
+familySize' f age = (+1) . sum . map (f . (age -)) $ [9,16..age]
 
-tick :: [LanternFish] -> [LanternFish]
-tick = concatMap progress
-  where progress 0 = [6, 8]
-        progress n = [n - 1]
+-- Memoization black magic based on haskell lazyness
+-- https://wiki.haskell.org/Memoization#Memoization_with_recursion
+memoize f = (map f [0..] !!)
+familySize = fix (memoize . familySize')
 
-partOne = do
-  lanternFishes :: [LanternFish] <- map read . splitOn "," <$> getContents
-  let c = length . (!! 80) . iterate tick $ lanternFishes
-  printf "After 80 days there are %d lantern fish" c 
+ageFromTimer = (8-)
 
-partTwo = error "not implemented yet"
+partCommon days = do
+  fishAges :: [Int] <- map (ageFromTimer . read) . splitOn "," <$> getContents
+  let population = sum . map (familySize . (+days)) $ fishAges
+  printf "After %d days there will be %d lantern fish" days population
+
+partOne = partCommon 80
+partTwo = partCommon 256
 
 main = do
   args <- getArgs
