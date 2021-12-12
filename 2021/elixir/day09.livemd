@@ -1,0 +1,59 @@
+# Day 09: Smoke Basin
+
+## Problem statement
+
+```elixir
+
+```
+
+## Setup
+
+### Dependencies
+
+```elixir
+Mix.install([
+  {:nx, "~> 0.1.0-dev", github: "elixir-nx/nx", branch: "main", sparse: "nx"},
+  {:kino, "~> 0.4.1"}
+])
+```
+
+### Input
+
+```elixir
+input = Kino.Input.textarea("Paste your input here")
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+parse_line = fn line ->
+  line
+  |> String.graphemes()
+  |> Enum.map(&String.to_integer/1)
+end
+
+heightmap =
+  input
+  |> Kino.Input.read()
+  |> String.split()
+  |> Enum.map(parse_line)
+  |> Nx.tensor()
+
+{rows, cols} = Nx.shape(heightmap)
+```
+
+## Part 1
+
+```elixir
+heightmap
+|> Nx.window_reduce(10, {3, 3}, [padding: :same], fn n, m -> min(n, m) end)
+|> Nx.equal(heightmap)
+|> Nx.select(Nx.add(heightmap, 1), Nx.tensor(0))
+|> IO.inspect(label: "low points:")
+|> Nx.sum()
+|> Nx.to_number()
+```
+
+```elixir
+Nx
+```
