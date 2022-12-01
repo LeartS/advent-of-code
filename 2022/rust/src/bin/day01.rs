@@ -16,8 +16,24 @@ fn part1() {
 }
 
 fn part2() {
-    let numbers: Vec<i32> = aoc2022::io::read_space_separated_values();
-    println!("{:?}", numbers);
+    let mut elfs: Vec<i32> = Vec::new();
+    let mut total: i32 = 0;
+    for line_result in aoc2022::io::iterate_lines() {
+        match line_result.expect("Could not read lien").as_str() {
+            "" => {
+                elfs.push(total);
+                total = 0;
+            }
+            l => {
+                total += l.parse::<i32>().expect("Invalid number");
+            }
+        }
+    }
+    elfs.push(total);
+    elfs.sort();
+    elfs.reverse();
+    let res: i32 = elfs.iter().take(3).sum();
+    println!("3 richest elfs have a total of {} calories", res);
 }
 
 pub fn main() {
