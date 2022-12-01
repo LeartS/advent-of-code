@@ -1,6 +1,11 @@
 use std::fmt::Debug;
-use std::io::{self, BufRead};
+use std::io::Lines;
+use std::io::{self, BufRead, StdinLock};
 use std::str::FromStr;
+
+pub fn iterate_lines() -> Lines<StdinLock<'static>> {
+    io::stdin().lock().lines()
+}
 
 pub fn read_line_separated_values<T>() -> Vec<T>
 where
