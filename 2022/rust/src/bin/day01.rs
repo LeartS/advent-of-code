@@ -31,8 +31,7 @@ fn part2() {
     }
     elfs.push(total);
     elfs.sort();
-    elfs.reverse();
-    let res: i32 = elfs.iter().take(3).sum();
+    let res: i32 = elfs.iter().rev.take(3).sum();
     println!("3 richest elfs have a total of {} calories", res);
 }
 
