@@ -5,7 +5,6 @@ fn part1() {
     println!("{:?}", numbers);
 }
 
-
 fn part2() {
     let numbers: Vec<i32> = aoc2022::io::read_space_separated_values();
     println!("{:?}", numbers);

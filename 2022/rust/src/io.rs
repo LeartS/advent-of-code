@@ -1,8 +1,6 @@
 use std::fmt::Debug;
-use std::{
-    io::{self, BufRead},
-    str::FromStr,
-};
+use std::io::{self, BufRead};
+use std::str::FromStr;
 
 pub fn read_line_separated_values<T>() -> Vec<T>
 where
