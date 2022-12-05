@@ -1,10 +1,9 @@
 use std::fmt::Debug;
-use std::io::Lines;
-use std::io::{self, BufRead, StdinLock};
+use std::io::{self, BufRead};
 use std::str::FromStr;
 
-pub fn iterate_lines() -> Lines<StdinLock<'static>> {
-    io::stdin().lock().lines()
+pub fn iterate_lines() -> impl Iterator<Item = String> {
+    io::stdin().lock().lines().map(|line| line.expect("could not read line"))
 }
 
 pub fn read_line_separated_values<T>() -> Vec<T>
