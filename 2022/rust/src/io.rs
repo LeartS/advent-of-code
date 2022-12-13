@@ -1,9 +1,27 @@
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::io::{self, BufRead};
 use std::str::FromStr;
 
+use itertools::Itertools;
+
 pub fn iterate_lines() -> impl Iterator<Item = String> {
-    io::stdin().lock().lines().map(|line| line.expect("could not read line"))
+    io::stdin()
+        .lock()
+        .lines()
+        .map(|line| line.expect("could not read line"))
+}
+
+pub fn read_matrix() -> Vec<Vec<isize>> {
+    io::stdin()
+        .lock()
+        .lines()
+        .map(|line| {
+            line.unwrap()
+                .chars()
+                .map(|c| c.to_digit(10).expect("Invalid digit") as isize)
+                .collect()
+        })
+        .collect()
 }
 
 pub fn read_line_separated_values<T>() -> Vec<T>
