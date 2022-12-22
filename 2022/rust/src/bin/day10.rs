@@ -46,7 +46,7 @@ fn parse_line(line: &str) -> Instruction {
         .expect("Invalid input line")
 }
 
-fn part1() {
+fn compute_register_history() -> [isize; 256] {
     let mut history = [1_isize; 256];
     aoc2022::io::iterate_lines()
         .map(|line| parse_line(&line))
@@ -62,6 +62,11 @@ fn part1() {
             }
         })
         .for_each(|(cycle, register_value)| history[cycle..].fill(register_value));
+    history
+}
+
+fn part1() {
+    let history = compute_register_history();
     let mut total = 0;
     for i in vec![20, 60, 100, 140, 180, 220] {
         let s = i as isize * history[i];
@@ -72,7 +77,21 @@ fn part1() {
 }
 
 fn part2() {
-    todo!()
+    let history = compute_register_history();
+    for row in 0..6 {
+        for col in 0..40 {
+            let cycle = row * 40 + col + 1;
+            print!(
+                "{}",
+                if history[cycle].abs_diff(col as isize) <= 1 {
+                    '#'
+                } else {
+                    '.'
+                }
+            )
+        }
+        println!("")
+    }
 }
 
 pub fn main() {
