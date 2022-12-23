@@ -40,6 +40,10 @@ where
         .collect()
 }
 
+pub fn print_matrix<T: Display>(matrix: &Vec<Vec<T>>) -> String {
+    matrix.iter().map(|row| row.into_iter().format("")).format("\n").to_string()
+}
+
 pub fn read_space_separated_values<T>() -> Vec<T>
 where
     T: FromStr,
