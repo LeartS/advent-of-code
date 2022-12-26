@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Display};
 use std::io::{self, BufRead};
+use std::iter::FromIterator;
 use std::str::FromStr;
 
 use itertools::Itertools;
@@ -24,8 +25,9 @@ pub fn read_matrix<T>(parse: fn(char) -> T) -> Vec<Vec<T>> {
         .collect()
 }
 
-pub fn read_line_separated_values<T>() -> Vec<T>
+pub fn read_line_separated_values<C, T>() -> C
 where
+    C: FromIterator<T>,
     T: FromStr,
     <T as FromStr>::Err: Debug,
 {
