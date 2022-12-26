@@ -11,14 +11,14 @@ pub fn iterate_lines() -> impl Iterator<Item = String> {
         .map(|line| line.expect("could not read line"))
 }
 
-pub fn read_matrix() -> Vec<Vec<isize>> {
+pub fn read_matrix<T>(parse: fn(char) -> T) -> Vec<Vec<T>> {
     io::stdin()
         .lock()
         .lines()
         .map(|line| {
             line.unwrap()
                 .chars()
-                .map(|c| c.to_digit(10).expect("Invalid digit") as isize)
+                .map(parse)
                 .collect()
         })
         .collect()

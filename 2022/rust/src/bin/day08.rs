@@ -85,7 +85,7 @@ fn scenic_score(visibility_map: &VisibilityMap, row: usize, col: usize) -> usize
 }
 
 fn part1() {
-    let grid = aoc2022::io::read_matrix();
+    let grid = aoc2022::io::read_matrix(|c| c.to_digit(10).expect("Invalid digit") as isize);
     let visibility_map = compute_visibility_map(&grid);
     let mut count = 0;
     for row in 0..grid.len() {
@@ -99,7 +99,7 @@ fn part1() {
 }
 
 fn part2() {
-    let grid = aoc2022::io::read_matrix();
+    let grid = aoc2022::io::read_matrix(|c| c.to_digit(10).expect("Invalid digit") as isize);
     let visibility_map = compute_visibility_map(&grid);
     let max_score = (0..grid.len())
         .cartesian_product(0..grid[0].len())
