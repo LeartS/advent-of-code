@@ -28,8 +28,7 @@ fn parse_starting_stacks(drawing: &str) -> Stacks {
 
 fn parse_instruction(line: String) -> Move {
     let re = Regex::new(r"^move (\d+) from (\d+) to (\d+)$").unwrap();
-    re
-        .captures(&line)
+    re.captures(&line)
         .expect("invalid line")
         .iter()
         .skip(1)
@@ -48,15 +47,15 @@ fn read_input() -> (Stacks, Vec<Move>) {
 }
 
 fn do_move_9000(stacks: &mut Stacks, (n, from, to): Move) {
-    let from_size = stacks[from-1].len();
-    let crates = stacks[from-1].drain(from_size-n..).rev().collect_vec();
-    stacks[to-1].extend(crates);
+    let from_size = stacks[from - 1].len();
+    let crates = stacks[from - 1].drain(from_size - n..).rev().collect_vec();
+    stacks[to - 1].extend(crates);
 }
 
 fn do_move_9001(stacks: &mut Stacks, (n, from, to): Move) {
-    let from_size = stacks[from-1].len();
-    let crates = stacks[from-1].drain(from_size-n..).collect_vec();
-    stacks[to-1].extend(crates);
+    let from_size = stacks[from - 1].len();
+    let crates = stacks[from - 1].drain(from_size - n..).collect_vec();
+    stacks[to - 1].extend(crates);
 }
 
 fn part1() {
@@ -64,7 +63,10 @@ fn part1() {
     for m in moves {
         do_move_9000(&mut stacks, m);
     }
-    let message = stacks.iter().map(|s| *s.last().expect("Empty stack")).join("");
+    let message = stacks
+        .iter()
+        .map(|s| *s.last().expect("Empty stack"))
+        .join("");
     println!("Top crates message: {}", message);
 }
 
@@ -73,7 +75,10 @@ fn part2() {
     for m in moves {
         do_move_9001(&mut stacks, m);
     }
-    let message = stacks.iter().map(|s| *s.last().expect("Empty stack")).join("");
+    let message = stacks
+        .iter()
+        .map(|s| *s.last().expect("Empty stack"))
+        .join("");
     println!("Top crates message: {}", message);
 }
 

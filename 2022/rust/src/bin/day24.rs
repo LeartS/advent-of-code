@@ -112,7 +112,12 @@ fn part2() {
         (0, 1),
         path_to_goal.len(),
     );
-    let path_to_goal_again = shortest_path(&map, (0, 1), (map.height - 1, map.width - 2), path_to_goal.len() + path_back.len());
+    let path_to_goal_again = shortest_path(
+        &map,
+        (0, 1),
+        (map.height - 1, map.width - 2),
+        path_to_goal.len() + path_back.len(),
+    );
     println!(
         "Can go to goal, back, and to goal again in {} minutes ({} + {} + {})",
         path_to_goal.len() + path_back.len() + path_to_goal_again.len(),

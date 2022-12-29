@@ -16,12 +16,7 @@ pub fn read_matrix<T>(parse: fn(char) -> T) -> Vec<Vec<T>> {
     io::stdin()
         .lock()
         .lines()
-        .map(|line| {
-            line.unwrap()
-                .chars()
-                .map(parse)
-                .collect()
-        })
+        .map(|line| line.unwrap().chars().map(parse).collect())
         .collect()
 }
 
@@ -43,7 +38,11 @@ where
 }
 
 pub fn print_matrix<T: Display>(matrix: &Vec<Vec<T>>) -> String {
-    matrix.iter().map(|row| row.into_iter().format("")).format("\n").to_string()
+    matrix
+        .iter()
+        .map(|row| row.into_iter().format(""))
+        .format("\n")
+        .to_string()
 }
 
 pub fn read_space_separated_values<T>() -> Vec<T>
