@@ -1,3 +1,5 @@
+use num::Integer;
+
 pub fn taxicab_neighbours(
     width: usize,
     height: usize,
@@ -13,3 +15,11 @@ pub fn taxicab_neighbours(
         .into_iter()
         .filter(move |&(r, c)| r < height && c < width)
 }
+
+pub fn taxicab_distance<T: Integer + Copy>(
+    (x1, y1): (T, T),
+    (x2, y2): (T, T),
+) -> T {
+    std::cmp::max(x1, x2) - std::cmp::min(x1, x2) + std::cmp::max(y1, y2) - std::cmp::min(y1, y2)
+}
+
