@@ -1,5 +1,8 @@
-import gleam/iterator
 import gleam/erlang
+import gleam/int
+import gleam/iterator
+import gleam/list
+import gleam/string
 
 pub fn iter_lines() -> iterator.Iterator(String) {
   iterator.unfold(
@@ -11,4 +14,12 @@ pub fn iter_lines() -> iterator.Iterator(String) {
       }
     },
   )
+}
+
+pub fn parse_ints(str: String) -> Result(List(Int), Nil) {
+  str
+  |> string.trim()
+  |> string.split(" ")
+  |> list.filter(fn(word) { !string.is_empty(word) })
+  |> list.try_map(int.base_parse(_, 10))
 }
