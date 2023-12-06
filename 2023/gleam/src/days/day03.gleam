@@ -34,11 +34,7 @@ pub fn number_is_adjacent_to(
   predicate: fn(grid.Entry(String)) -> Bool,
 ) -> Bool {
   number_cells
-  |> list.flat_map(fn(cell) {
-    let #(_value, coords) = cell
-    schematic
-    |> grid.adjacents_with_diagonals(coords)
-  })
+  |> list.flat_map(fn(cell) { grid.adjacents_with_diagonals(schematic, cell.1) })
   |> list.any(predicate)
 }
 

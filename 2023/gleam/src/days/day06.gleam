@@ -5,7 +5,7 @@ import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
-import utils
+import utils/io as io_utils
 
 pub fn winning_holding_times(time: Int, distance: Int) -> #(Int, Int) {
   let assert Ok(b24ac) = int.square_root(time * time - 4 * distance)
@@ -46,11 +46,11 @@ pub fn main() {
   let assert Ok(Ok(times)) =
     erlang.get_line("")
     |> result.map(string.drop_left(_, 5))
-    |> result.map(utils.parse_ints)
+    |> result.map(io_utils.parse_ints)
   let assert Ok(Ok(distances)) =
     erlang.get_line("")
     |> result.map(string.drop_left(_, 9))
-    |> result.map(utils.parse_ints)
+    |> result.map(io_utils.parse_ints)
   let races = list.zip(times, distances)
   let part1_sol = part1(races)
   io.println("Part 1: " <> int.to_string(part1_sol))

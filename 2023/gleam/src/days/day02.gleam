@@ -3,7 +3,7 @@ import gleam/io
 import gleam/iterator
 import gleam/list
 import gleam/string
-import utils
+import utils/io as io_utils
 
 pub type Round {
   Round(red: Int, green: Int, blue: Int)
@@ -68,7 +68,7 @@ pub fn minimum_required_cubes_power(game: Game) -> Int {
 
 pub fn main() {
   let games: List(Game) =
-    utils.iter_lines()
+    io_utils.iter_lines()
     |> iterator.map(parse_game)
     |> iterator.to_list()
 

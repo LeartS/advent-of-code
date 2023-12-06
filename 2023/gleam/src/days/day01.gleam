@@ -3,7 +3,7 @@ import gleam/int
 import gleam/regex
 import gleam/iterator
 import gleam/string
-import utils
+import utils/io as io_utils
 
 fn despell(spelling: String) -> String {
   case spelling {
@@ -46,7 +46,7 @@ fn calibration_value_lax(line: String) -> Int {
 }
 
 pub fn main() {
-  utils.iter_lines()
+  io_utils.iter_lines()
   |> iterator.map(calibration_value_lax)
   |> iterator.to_list()
   |> int.sum()
