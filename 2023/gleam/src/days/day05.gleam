@@ -1,30 +1,30 @@
-import gleam/erlang/file
 import gleam/int
 import gleam/io
 import gleam/list
 import gleam/order.{type Order}
 import gleam/result
 import gleam/string
+import utils/io as io_utils
 
 const max_n = 100_000_000_000
 
-pub type MapRange {
+type MapRange {
   MapRange(source: Int, destination: Int, length: Int)
 }
 
-pub type Map {
+type Map {
   Map(name: String, ranges: List(MapRange))
 }
 
-pub type Almanac {
+type Almanac {
   Almanac(seeds: List(Int), maps: List(Map))
 }
 
-pub fn compare_range(a: MapRange, b: MapRange) -> Order {
+fn compare_range(a: MapRange, b: MapRange) -> Order {
   int.compare(a.source, b.source)
 }
 
-pub fn parse_map(map: String) -> Map {
+fn parse_map(map: String) -> Map {
   let assert Ok(#(name, ranges)) = string.split_once(map, "\n")
   let ranges =
     ranges
@@ -40,7 +40,7 @@ pub fn parse_map(map: String) -> Map {
   Map(name: string.drop_right(name, 5), ranges: ranges)
 }
 
-pub fn parse_seeds(seeds_line: String) -> List(Int) {
+fn parse_seeds(seeds_line: String) -> List(Int) {
   let assert Ok(seeds) =
     seeds_line
     |> string.drop_left(7)
@@ -49,7 +49,7 @@ pub fn parse_seeds(seeds_line: String) -> List(Int) {
   seeds
 }
 
-pub fn parse_almanac(contents: String) -> Almanac {
+fn parse_almanac(contents: String) -> Almanac {
   let assert [seeds_text, ..maps] =
     contents
     |> string.split("\n\n")
@@ -59,7 +59,7 @@ pub fn parse_almanac(contents: String) -> Almanac {
   Almanac(seeds: seeds, maps: maps)
 }
 
-pub fn fill_gaps(ranges: List(MapRange)) -> List(MapRange) {
+fn fill_gaps(ranges: List(MapRange)) -> List(MapRange) {
   let #(next, ranges) =
     ranges
     |> list.sort(by: compare_range)
@@ -94,7 +94,7 @@ pub fn fill_gaps(ranges: List(MapRange)) -> List(MapRange) {
 pub type Interval =
   #(Int, Int)
 
-pub fn map_interval(interval: Interval, map: Map) -> List(Interval) {
+fn map_interval(interval: Interval, map: Map) -> List(Interval) {
   let #(interval_from, interval_length) = interval
   let interval_to = interval_from + interval_length - 1
   map.ranges
@@ -118,7 +118,7 @@ pub fn map_interval(interval: Interval, map: Map) -> List(Interval) {
   )
 }
 
-pub fn map_number(n: Int, map: Map) -> Int {
+fn map_number(n: Int, map: Map) -> Int {
   let dest =
     map.ranges
     |> list.find_map(fn(range) {
@@ -133,11 +133,11 @@ pub fn map_number(n: Int, map: Map) -> Int {
   dest
 }
 
-pub fn location_for_seed(almanac: Almanac, seed: Int) -> Int {
+fn location_for_seed(almanac: Almanac, seed: Int) -> Int {
   list.fold(almanac.maps, seed, map_number)
 }
 
-pub fn location_for_intervals(
+fn location_for_intervals(
   almanac: Almanac,
   intervals: List(Interval),
 ) -> List(Interval) {
@@ -148,7 +148,8 @@ pub fn location_for_intervals(
   )
 }
 
-pub fn part1(almanac: Almanac) -> Int {
+pub fn part1(input: String) -> Int {
+  let almanac = parse_almanac(input)
   let assert Ok(res) =
     almanac.seeds
     |> list.map(location_for_seed(almanac, _))
@@ -156,7 +157,8 @@ pub fn part1(almanac: Almanac) -> Int {
   res
 }
 
-pub fn part2(almanac: Almanac) -> Int {
+pub fn part2(input: String) -> Int {
+  let almanac = parse_almanac(input)
   let seeds_intervals =
     almanac.seeds
     |> list.sized_chunk(2)
@@ -173,14 +175,7 @@ pub fn part2(almanac: Almanac) -> Int {
 }
 
 pub fn main() {
-  let assert Ok(contents) = file.read("/dev/stdin")
-  let almanac = parse_almanac(contents)
-  let part1_sol = part1(almanac)
-  io.println(
-    "Part 1: the minimum location for seeds is " <> int.to_string(part1_sol),
-  )
-  let part2_sol = part2(almanac)
-  io.println(
-    "Part 2: minimum location for seeds is " <> int.to_string(part2_sol),
-  )
+  let assert Ok(input) = io_utils.read_stdin()
+  io.println("Part 1: " <> int.to_string(part1(input)))
+  io.println("Part 2: " <> int.to_string(part2(input)))
 }

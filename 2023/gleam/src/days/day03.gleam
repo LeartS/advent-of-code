@@ -1,4 +1,3 @@
-import gleam/erlang/file
 import gleam/int
 import gleam/io
 import gleam/iterator
@@ -6,29 +5,30 @@ import gleam/list
 import gleam/pair
 import gleam/result
 import gleam/string
+import utils/io as io_utils
 import utils/grid
 
-pub type Schematic =
+type Schematic =
   grid.Grid(String)
 
-pub type NumberCells =
+type NumberCells =
   List(grid.Entry(String))
 
-pub fn is_digit(char: String) -> Bool {
+fn is_digit(char: String) -> Bool {
   case char {
     "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" -> True
     _ -> False
   }
 }
 
-pub fn is_symbol(char: String) -> Bool {
+fn is_symbol(char: String) -> Bool {
   case char {
     "." -> False
     c -> !is_digit(c)
   }
 }
 
-pub fn number_is_adjacent_to(
+fn number_is_adjacent_to(
   schematic: Schematic,
   number_cells: NumberCells,
   predicate: fn(grid.Entry(String)) -> Bool,
@@ -38,7 +38,7 @@ pub fn number_is_adjacent_to(
   |> list.any(predicate)
 }
 
-pub fn is_part_number(schematic: Schematic, number_cells: NumberCells) -> Bool {
+fn is_part_number(schematic: Schematic, number_cells: NumberCells) -> Bool {
   number_is_adjacent_to(
     schematic,
     number_cells,
@@ -46,14 +46,14 @@ pub fn is_part_number(schematic: Schematic, number_cells: NumberCells) -> Bool {
   )
 }
 
-pub fn cells_to_number(number_cells: NumberCells) -> Result(Int, Nil) {
+fn cells_to_number(number_cells: NumberCells) -> Result(Int, Nil) {
   number_cells
   |> list.map(pair.first)
   |> string.concat()
   |> int.base_parse(10)
 }
 
-pub fn find_numbers(schematic: Schematic) -> List(NumberCells) {
+fn find_numbers(schematic: Schematic) -> List(NumberCells) {
   schematic
   |> grid.iterate()
   // split into contiguous pieces
@@ -75,7 +75,9 @@ pub fn find_numbers(schematic: Schematic) -> List(NumberCells) {
   |> iterator.to_list()
 }
 
-pub fn part1(schematic: Schematic) -> Result(Int, Nil) {
+pub fn part1(input: String) -> Int {
+  let schematic = grid.from_string(input)
+
   schematic
   |> find_numbers()
   // check if they are part numbers
@@ -83,9 +85,11 @@ pub fn part1(schematic: Schematic) -> Result(Int, Nil) {
   // Calculate output
   |> list.try_map(cells_to_number)
   |> result.map(int.sum)
+  |> result.unwrap(-1)
 }
 
-pub fn part2(schematic: Schematic) -> Result(Int, Nil) {
+pub fn part2(input: String) -> Int {
+  let schematic = grid.from_string(input)
   let part_numbers =
     schematic
     |> find_numbers()
@@ -117,13 +121,11 @@ pub fn part2(schematic: Schematic) -> Result(Int, Nil) {
     |> result.map(int.product)
   })
   |> result.map(int.sum)
+  |> result.unwrap(-1)
 }
 
 pub fn main() {
-  let assert Ok(contents) = file.read("/dev/stdin")
-  let schematic = grid.from_string(contents)
-  let assert Ok(part1_sol) = part1(schematic)
-  io.println("Part 1: " <> int.to_string(part1_sol))
-  let assert Ok(part2_sol) = part2(schematic)
-  io.println("Part 2: " <> int.to_string(part2_sol))
+  let assert Ok(input) = io_utils.read_stdin()
+  io.println("Part 1: " <> int.to_string(part1(input)))
+  io.println("Part 2: " <> int.to_string(part2(input)))
 }

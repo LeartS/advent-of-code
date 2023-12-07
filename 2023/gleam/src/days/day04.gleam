@@ -10,10 +10,10 @@ import gleam/string
 import gleam/set
 import utils/io as io_utils
 
-pub type Card =
+type Card =
   #(set.Set(Int), set.Set(Int))
 
-pub fn parse_card(card_line: String) -> Card {
+fn parse_card(card_line: String) -> Card {
   let assert Ok(#(_, numbers_str)) = string.split_once(card_line, ":")
   let assert Ok(#(winning, own)) = string.split_once(numbers_str, " | ")
   let assert Ok(winning) =
@@ -27,13 +27,13 @@ pub fn parse_card(card_line: String) -> Card {
   #(winning, own)
 }
 
-pub fn count_winners(card: Card) -> Int {
+fn count_winners(card: Card) -> Int {
   card.0
   |> set.intersection(card.1)
   |> set.size()
 }
 
-pub fn points(n_winners: Int) -> Int {
+fn points(n_winners: Int) -> Int {
   let assert Ok(points) =
     iterator.single(0)
     |> iterator.append(iterator.iterate(1, fn(n) { n * 2 }))
@@ -41,13 +41,7 @@ pub fn points(n_winners: Int) -> Int {
   points
 }
 
-pub fn part1(cards: List(Card)) -> Int {
-  cards
-  |> list.map(function.compose(count_winners, points))
-  |> int.sum()
-}
-
-pub fn add_winning_copies(
+fn add_winning_copies(
   cards_counts: dict.Dict(Int, Int),
   card: Card,
   card_index: Int,
@@ -72,7 +66,19 @@ pub fn add_winning_copies(
   )
 }
 
-pub fn part2(cards: List(Card)) -> Int {
+pub fn part1(input: String) -> Int {
+  input
+  |> string.split("\n")
+  |> list.map(parse_card)
+  |> list.map(function.compose(count_winners, points))
+  |> int.sum()
+}
+
+pub fn part2(input: String) -> Int {
+  let cards =
+    input
+    |> string.split("\n")
+    |> list.map(parse_card)
   let cards_count =
     list.range(from: 0, to: list.length(cards) - 1)
     |> list.map(fn(i) { #(i, 1) })
@@ -85,12 +91,7 @@ pub fn part2(cards: List(Card)) -> Int {
 }
 
 pub fn main() {
-  let cards =
-    io_utils.iter_lines()
-    |> iterator.map(parse_card)
-    |> iterator.to_list()
-  let part1_sol = part1(cards)
-  io.println("Part 1: " <> int.to_string(part1_sol))
-  let part2_sol = part2(cards)
-  io.println("Part 2: " <> int.to_string(part2_sol))
+  let assert Ok(input) = io_utils.read_stdin()
+  io.println("Part 1: " <> int.to_string(part1(input)))
+  io.println("Part 2: " <> int.to_string(part2(input)))
 }

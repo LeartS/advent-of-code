@@ -1,7 +1,7 @@
 import gleam/io
 import gleam/int
+import gleam/list
 import gleam/regex
-import gleam/iterator
 import gleam/string
 import utils/io as io_utils
 
@@ -45,11 +45,40 @@ fn calibration_value_lax(line: String) -> Int {
   n
 }
 
-pub fn main() {
-  io_utils.iter_lines()
-  |> iterator.map(calibration_value_lax)
-  |> iterator.to_list()
+fn is_digit(char: String) -> Bool {
+  case char {
+    "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" -> True
+    _ -> False
+  }
+}
+
+fn calibration_value_strict(line: String) -> Int {
+  let chars = string.to_graphemes(line)
+  let assert Ok(first_digit) = list.find(chars, is_digit)
+  let assert Ok(last_digit) =
+    chars
+    |> list.reverse()
+    |> list.find(is_digit)
+  let assert Ok(number) = int.base_parse({ first_digit <> last_digit }, 10)
+  number
+}
+
+pub fn part1(input: String) -> Int {
+  input
+  |> string.split("\n")
+  |> list.map(calibration_value_strict)
   |> int.sum()
-  |> int.to_string()
-  |> io.println()
+}
+
+pub fn part2(input: String) -> Int {
+  input
+  |> string.split("\n")
+  |> list.map(calibration_value_lax)
+  |> int.sum()
+}
+
+pub fn main() {
+  let assert Ok(input) = io_utils.read_stdin()
+  io.println("Part 1: " <> int.to_string(part1(input)))
+  io.println("Part 2: " <> int.to_string(part2(input)))
 }
