@@ -1,16 +1,17 @@
-import days/day01
-import days/day02
-import days/day03
-import days/day04
-import days/day05
-import days/day06
-import utils/ascii_table
 import gleam/erlang/file
 import gleam/function
 import gleam/int
 import gleam/io
 import gleam/list
 import gleam/string
+import days/day01
+import days/day02
+import days/day03
+import days/day04
+import days/day05
+import days/day06
+import days/day07
+import utils/ascii_table
 
 pub fn read_input(day: Int) -> String {
   let assert Ok(input) =
@@ -31,6 +32,7 @@ const solutions = [
   #(day04.part1, day04.part2),
   #(day05.part1, day05.part2),
   #(day06.part1, day06.part2),
+  #(day07.part1, day07.part2),
 ]
 
 fn run_solution(
