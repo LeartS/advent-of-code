@@ -11,6 +11,7 @@ import days/day04
 import days/day05
 import days/day06
 import days/day07
+import days/day08
 import utils/ascii_table
 
 pub fn read_input(day: Int) -> String {
@@ -33,6 +34,7 @@ const solutions = [
   #(day05.part1, day05.part2),
   #(day06.part1, day06.part2),
   #(day07.part1, day07.part2),
+  #(day08.part1, day08.part2),
 ]
 
 fn run_solution(
