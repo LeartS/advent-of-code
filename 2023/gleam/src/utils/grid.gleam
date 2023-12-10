@@ -26,11 +26,28 @@ import gleam/io
 pub type Coord =
   #(Int, Int)
 
-pub type Entry(a) =
-  #(a, Coord)
+pub type Cell(a) {
+  Cell(value: a, coords: Coord)
+}
 
 pub opaque type Grid(a) {
-  Grid(size: #(Int, Int), cells: arrays.Array(a))
+  Grid(size: #(Int, Int), values: arrays.Array(a))
+}
+
+pub type Direction {
+  Up
+  UpRight
+  Right
+  DownRight
+  Down
+  DownLeft
+  Left
+  UpLeft
+  Zero
+}
+
+pub type Adjacent(a) {
+  Adjacent(cell: Cell(a), direction: Direction)
 }
 
 pub fn from_string_with(
@@ -46,13 +63,13 @@ pub fn from_string_with(
     lines
     |> list.first()
     |> result.map(string.length)
-  let cells =
+  let values =
     contents
     |> string.replace(each: "\n", with: "")
     |> string.to_graphemes()
     |> list.map(cell_transformer)
     |> arrays.from_list()
-  Grid(size: #(n_rows, n_cols), cells: cells)
+  Grid(size: #(n_rows, n_cols), values: values)
 }
 
 pub fn from_string(contents: String) -> Grid(String) {
@@ -65,17 +82,39 @@ pub fn in_bounds(grid: Grid(a), coords: Coord) -> Bool {
   r >= 0 && r < n_rows && c >= 0 && c < n_cols
 }
 
+pub fn direction(from: Coord, to: Coord) -> Direction {
+  case from, to {
+    #(r1, c1), #(r2, c2) if r1 < r2 && c1 < c2 -> DownRight
+    #(r1, c1), #(r2, c2) if r1 < r2 && c1 == c2 -> Down
+    #(r1, c1), #(r2, c2) if r1 < r2 && c1 > c2 -> DownLeft
+    #(r1, c1), #(r2, c2) if r1 == r2 && c1 < c2 -> Right
+    #(r1, c1), #(r2, c2) if r1 == r2 && c1 == c2 -> Zero
+    #(r1, c1), #(r2, c2) if r1 == r2 && c1 > c2 -> Left
+    #(r1, c1), #(r2, c2) if r1 > r2 && c1 < c2 -> UpRight
+    #(r1, c1), #(r2, c2) if r1 > r2 && c1 == c2 -> Up
+    #(r1, c1), #(r2, c2) if r1 > r2 && c1 > c2 -> UpLeft
+  }
+}
+
 pub fn adjacents_without_diagonals(
   grid: Grid(a),
   coords: Coord,
-) -> List(Entry(a)) {
+) -> List(Adjacent(a)) {
   let #(row, col) = coords
   [#(row - 1, col), #(row, col - 1), #(row, col + 1), #(row + 1, col)]
   |> list.filter(in_bounds(grid, _))
-  |> list.map(fn(coords) { #(get(grid, coords), coords) })
+  |> list.map(fn(adj_coords) {
+    Adjacent(
+      cell: Cell(get(grid, adj_coords), adj_coords),
+      direction: direction(coords, adj_coords),
+    )
+  })
 }
 
-pub fn adjacents_with_diagonals(grid: Grid(a), coords: Coord) -> List(Entry(a)) {
+pub fn adjacents_with_diagonals(
+  grid: Grid(a),
+  coords: Coord,
+) -> List(Adjacent(a)) {
   let #(row, col) = coords
   [
     #(row - 1, col - 1),
@@ -88,7 +127,12 @@ pub fn adjacents_with_diagonals(grid: Grid(a), coords: Coord) -> List(Entry(a)) 
     #(row + 1, col + 1),
   ]
   |> list.filter(in_bounds(grid, _))
-  |> list.map(fn(coords) { #(get(grid, coords), coords) })
+  |> list.map(fn(adj_coords) {
+    Adjacent(
+      cell: Cell(get(grid, adj_coords), adj_coords),
+      direction: direction(coords, adj_coords),
+    )
+  })
 }
 
 /// Transform coordinates (row, col) into linear index
@@ -127,11 +171,11 @@ pub fn to_coords(grid: Grid(a), index: Int) -> Coord {
 
 pub fn get(grid: Grid(a), coords: Coord) -> a {
   let index = to_index(grid, coords)
-  arrays.get(grid.cells, index)
+  arrays.get(grid.values, index)
 }
 
-pub fn iterate(grid: Grid(a)) -> iterator.Iterator(Entry(a)) {
+pub fn iterate(grid: Grid(a)) -> iterator.Iterator(Cell(a)) {
   use r <- iterator.flat_map(iterator.range(from: 0, to: grid.size.0 - 1))
   use c <- iterator.map(iterator.range(from: 0, to: grid.size.1 - 1))
-  #(get(grid, #(r, c)), #(r, c))
+  Cell(get(grid, #(r, c)), #(r, c))
 }

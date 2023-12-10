@@ -11,8 +11,8 @@ import utils/grid
 type Schematic =
   grid.Grid(String)
 
-type NumberCells =
-  List(grid.Entry(String))
+type ContiguousCells =
+  List(grid.Cell(String))
 
 fn is_digit(char: String) -> Bool {
   case char {
@@ -30,48 +30,49 @@ fn is_symbol(char: String) -> Bool {
 
 fn number_is_adjacent_to(
   schematic: Schematic,
-  number_cells: NumberCells,
-  predicate: fn(grid.Entry(String)) -> Bool,
+  number_cells: ContiguousCells,
+  predicate: fn(grid.Cell(String)) -> Bool,
 ) -> Bool {
   number_cells
-  |> list.flat_map(fn(cell) { grid.adjacents_with_diagonals(schematic, cell.1) })
-  |> list.any(predicate)
+  |> list.flat_map(fn(cell) {
+    grid.adjacents_with_diagonals(schematic, cell.coords)
+  })
+  |> list.any(fn(adj) { predicate(adj.cell) })
 }
 
-fn is_part_number(schematic: Schematic, number_cells: NumberCells) -> Bool {
+fn is_part_number(schematic: Schematic, number_cells: ContiguousCells) -> Bool {
   number_is_adjacent_to(
     schematic,
     number_cells,
-    fn(adj_cell) { is_symbol(adj_cell.0) },
+    fn(adj_cell) { is_symbol(adj_cell.value) },
   )
 }
 
-fn cells_to_number(number_cells: NumberCells) -> Result(Int, Nil) {
+fn cells_to_number(number_cells: ContiguousCells) -> Result(Int, Nil) {
   number_cells
-  |> list.map(pair.first)
+  |> list.map(fn(cell) { cell.value })
   |> string.concat()
   |> int.base_parse(10)
 }
 
-fn find_numbers(schematic: Schematic) -> List(NumberCells) {
+fn is_number_cells(piece: ContiguousCells) -> Bool {
+  let assert Ok(grid.Cell(value: value, ..)) = list.first(piece)
+  is_digit(value)
+}
+
+fn find_numbers(schematic: Schematic) -> List(ContiguousCells) {
   schematic
   |> grid.iterate()
   // split into contiguous pieces
-  |> iterator.chunk(fn(it) {
-    case is_digit(it.0) {
+  |> iterator.chunk(fn(cell) {
+    case is_digit(cell.value) {
       // To make sure number pieces don't span multiple lines
-      True -> { it.1 }.0
+      True -> cell.coords.0
       False -> -1
     }
   })
   // exclude non-number contiguous pieces
-  |> iterator.filter(fn(piece) {
-    piece
-    |> list.first()
-    |> result.unwrap(#(".", #(0, 0)))
-    |> pair.first()
-    |> is_digit()
-  })
+  |> iterator.filter(is_number_cells)
   |> iterator.to_list()
 }
 
@@ -97,19 +98,17 @@ pub fn part2(input: String) -> Int {
 
   schematic
   |> grid.iterate()
-  |> iterator.filter(fn(cell) { cell.0 == "*" })
+  |> iterator.filter(fn(cell) { cell.value == "*" })
   |> iterator.map(fn(gear_cell) {
     let predicate = fn(adj_cell) { adj_cell == gear_cell }
     let adjacent_part_numbers =
       part_numbers
       |> list.filter(fn(number_cells) {
         // performance optimization: immediately exclude numbers that are not in an adjacent row
-        let assert [#(_, #(number_row, _)), ..] = number_cells
-        number_row >= { gear_cell.1 }.0 - 1 && number_row <= { gear_cell.1 }.0 + 1 && number_is_adjacent_to(
-          schematic,
-          number_cells,
-          predicate,
-        )
+        let assert [grid.Cell(coords: #(number_row, _), ..), ..] = number_cells
+        number_row >= { gear_cell.coords }.0 - 1 && number_row <= {
+          gear_cell.coords
+        }.0 + 1 && number_is_adjacent_to(schematic, number_cells, predicate)
       })
     #(gear_cell, adjacent_part_numbers)
   })
