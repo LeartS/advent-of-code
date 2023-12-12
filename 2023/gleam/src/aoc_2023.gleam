@@ -12,6 +12,7 @@ import days/day05
 import days/day06
 import days/day07
 import days/day08
+import days/day09
 import days/day10
 import days/day11
 import utils/ascii_table
@@ -34,6 +35,7 @@ const solutions = [
   #(6, #(day06.part1, day06.part2)),
   #(7, #(day07.part1, day07.part2)),
   #(8, #(day08.part1, day08.part2)),
+  #(9, #(day09.part1, day09.part2)),
   #(10, #(day10.part1, day10.part2)),
   #(11, #(day11.part1, day11.part2)),
 ]
