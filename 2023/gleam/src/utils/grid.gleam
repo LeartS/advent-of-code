@@ -76,6 +76,10 @@ pub fn from_string(contents: String) -> Grid(String) {
   from_string_with(contents, function.identity)
 }
 
+pub fn size(grid: Grid(a)) -> #(Int, Int) {
+  grid.size
+}
+
 pub fn in_bounds(grid: Grid(a), coords: Coord) -> Bool {
   let #(n_rows, n_cols) = grid.size
   let #(r, c) = coords
@@ -93,6 +97,43 @@ pub fn direction(from: Coord, to: Coord) -> Direction {
     #(r1, c1), #(r2, c2) if r1 > r2 && c1 < c2 -> UpRight
     #(r1, c1), #(r2, c2) if r1 > r2 && c1 == c2 -> Up
     #(r1, c1), #(r2, c2) if r1 > r2 && c1 > c2 -> UpLeft
+  }
+}
+
+pub fn opposite_direction(direction: Direction) -> Direction {
+  case direction {
+    Up -> Down
+    UpRight -> DownLeft
+    Right -> Left
+    DownRight -> UpLeft
+    Down -> Up
+    DownLeft -> UpRight
+    Left -> Right
+    UpLeft -> DownRight
+    Zero -> Zero
+  }
+}
+
+pub fn move(
+  on grid: Grid(a),
+  from from: Coord,
+  towards direction: Direction,
+) -> Result(Coord, Nil) {
+  let #(r, c) = from
+  let new = case direction {
+    Up -> #(r - 1, c)
+    UpRight -> #(r - 1, c + 1)
+    Right -> #(r, c + 1)
+    DownRight -> #(r + 1, c + 1)
+    Down -> #(r + 1, c)
+    DownLeft -> #(r + 1, c - 1)
+    Left -> #(r, c - 1)
+    UpLeft -> #(r - 1, c - 1)
+    Zero -> #(r, c)
+  }
+  case in_bounds(grid, new) {
+    True -> Ok(new)
+    False -> Error(Nil)
   }
 }
 
@@ -172,6 +213,10 @@ pub fn to_coords(grid: Grid(a), index: Int) -> Coord {
 pub fn get(grid: Grid(a), coords: Coord) -> a {
   let index = to_index(grid, coords)
   arrays.get(grid.values, index)
+}
+
+pub fn cell_at(grid: Grid(a), coords: Coord) -> Cell(a) {
+  Cell(value: get(grid, coords), coords: coords)
 }
 
 pub fn iterate(grid: Grid(a)) -> iterator.Iterator(Cell(a)) {

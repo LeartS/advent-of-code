@@ -12,29 +12,28 @@ import days/day05
 import days/day06
 import days/day07
 import days/day08
+import days/day10
 import utils/ascii_table
 
 pub fn read_input(day: Int) -> String {
-  let assert Ok(input) =
-    file.read(
-      "../inputs/day" <> {
-        day
-        |> int.to_string()
-        |> string.pad_left(2, "0")
-      } <> ".in",
-    )
+  let padded_day =
+    day
+    |> int.to_string()
+    |> string.pad_left(2, "0")
+  let assert Ok(input) = file.read("../inputs/day" <> padded_day <> ".in")
   string.trim(input)
 }
 
 const solutions = [
-  #(day01.part1, day01.part2),
-  #(day02.part1, day02.part2),
-  #(day03.part1, day03.part2),
-  #(day04.part1, day04.part2),
-  #(day05.part1, day05.part2),
-  #(day06.part1, day06.part2),
-  #(day07.part1, day07.part2),
-  #(day08.part1, day08.part2),
+  #(1, #(day01.part1, day01.part2)),
+  #(2, #(day02.part1, day02.part2)),
+  #(3, #(day03.part1, day03.part2)),
+  #(4, #(day04.part1, day04.part2)),
+  #(5, #(day05.part1, day05.part2)),
+  #(6, #(day06.part1, day06.part2)),
+  #(7, #(day07.part1, day07.part2)),
+  #(8, #(day08.part1, day08.part2)),
+  #(10, #(day10.part1, day10.part2)),
 ]
 
 fn run_solution(
@@ -59,8 +58,9 @@ fn run_solution(
 }
 
 pub fn main() {
-  let outputs =
-    list.index_map(solutions, fn(index, fns) { run_solution(index + 1, fns) })
-  ascii_table.table([["Day", "Part 1", "Part2"], ..outputs])
+  solutions
+  |> list.map(fn(el) { run_solution(el.0, el.1) })
+  |> list.prepend(["Day", "Part 1", "Part2"])
+  |> ascii_table.table()
   |> io.println()
 }
