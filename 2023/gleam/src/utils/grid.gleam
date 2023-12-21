@@ -224,3 +224,27 @@ pub fn iterate(grid: Grid(a)) -> iterator.Iterator(Cell(a)) {
   use c <- iterator.map(iterator.range(from: 0, to: grid.size.1 - 1))
   Cell(get(grid, #(r, c)), #(r, c))
 }
+
+pub fn iterate_by_columns(grid: Grid(a)) -> iterator.Iterator(Cell(a)) {
+  use col <- iterator.flat_map(iterator.range(from: 0, to: grid.size.1 - 1))
+  use row <- iterator.map(iterator.range(from: 0, to: grid.size.0 - 1))
+  Cell(get(grid, #(row, col)), #(row, col))
+}
+
+pub fn iter_column(grid: Grid(a), col: Int) -> iterator.Iterator(Cell(a)) {
+  use row <- iterator.map(iterator.range(from: 0, to: grid.size.0 - 1))
+  Cell(get(grid, #(row, col)), #(row, col))
+}
+
+pub fn iter_row(grid: Grid(a), row: Int) -> iterator.Iterator(Cell(a)) {
+  use col <- iterator.map(iterator.range(from: 0, to: grid.size.1 - 1))
+  Cell(get(grid, #(row, col)), #(row, col))
+}
+
+pub fn column(grid: Grid(a), col: Int) -> List(Cell(a)) {
+  iterator.to_list(iter_column(grid, col))
+}
+
+pub fn row(grid: Grid(a), row: Int) -> List(Cell(a)) {
+  iterator.to_list(iter_row(grid, row))
+}
